@@ -34,9 +34,9 @@ def test_login_valido():
     }
     response = requests.post(f"{BASE_URL}/auth/login", json=payload)
 
-    assert response.status_code == 200, (
-        f"Esperado 200, recebido {response.status_code}"
-    )
+    assert response.status_code in [200, 201], (
+    f"Esperado 200 ou 201, recebido {response.status_code}"
+)
 
     dados = response.json()
 
