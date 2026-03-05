@@ -1,0 +1,57 @@
+# ==============================================================
+# GitHub Actions Workflow
+#
+# O que é isso? É uma pipeline de CI/CD (Integração Contínua).
+# Toda vez que você faz um push ou pull request,
+# o GitHub executa automaticamente todos os seus testes.
+#
+# Em entrevista: 'Configurei CI/CD com GitHub Actions para
+# garantir que nenhum commit quebre os testes existentes.
+# Isso simula um ambiente profissional de desenvolvimento.'
+# ==============================================================
+
+name: Testes de API
+
+# on: define QUANDO o workflow é executado
+on:
+  push:
+    branches: [ main ]   # Executa em todo push na branch main
+  pull_request:
+    branches: [ main ]   # Executa em todo PR para a main
+
+jobs:
+  testes:
+    # Define o sistema operacional da máquina virtual do GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      # Passo 1: Baixa o código do repositório
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      # Passo 2: Instala o Python na versão especificada
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Passo 3: Instala as dependências listadas no requirements.txt
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      # Passo 4: Executa os testes e gera relatório HTML
+      # --tb=short: mostra resumo dos erros (não o traceback completo)
+      # -v: verbose (mostra o nome de cada teste)
+      # --html: gera relatório visual em HTML
+      - name: Executar testes com Pytest
+        run: |
+          pytest tests/ -v --tb=short --html=relatorio.html --self-contained-html
+
+      # Passo 5: Salva o relatório HTML como artefato downloadável
+      # Artefatos ficam disponíveis na aba Actions do repositório
+      - name: Salvar relatório HTML
+        uses: actions/upload-artifact@v4
+        if: always()  # Salva mesmo se os testes falharem
+        with:
+          name: relatorio-testes
+          path: relatorio.html
